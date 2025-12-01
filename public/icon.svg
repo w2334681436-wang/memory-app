@@ -1,15 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg width="400" height="400" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="grad_infinity" x1="0%" y1="50%" x2="100%" y2="50%">
-      <stop offset="0%" stop-color="#240b5e" /> <stop offset="100%" stop-color="#892cdc" /> </linearGradient>
+    <linearGradient id="infinityGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2e156b;stop-opacity:1" /> <stop offset="50%" style="stop-color:#582695;stop-opacity:1" /> <stop offset="100%" style="stop-color:#8e44ad;stop-opacity:1" /> </linearGradient>
   </defs>
-  
-  <rect x="0" y="0" width="512" height="512" rx="120" ry="120" fill="#ffffff"/>
-  
-  <path d="M165,256 C165,175 256,175 256,256 C256,337 347,337 347,256 C347,175 256,175 256,256 C256,337 165,337 165,256 Z"
-        fill="none"
-        stroke="url(#grad_infinity)"
-        stroke-width="95"
-        stroke-linecap="round"
-        stroke-linejoin="round"/>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="#ffffff" />
+
+  <path d="
+    M 512, 512
+    C 362, 332, 112, 332, 112, 512
+    S 362, 692, 512, 512
+    S 912, 332, 912, 512
+    S 662, 692, 512, 512
+    Z" 
+    fill="none" 
+    stroke="url(#infinityGradient)" 
+    stroke-width="160" 
+    stroke-linecap="round" 
+    stroke-linejoin="round"
+  />
 </svg>

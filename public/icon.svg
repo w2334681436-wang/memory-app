@@ -1,19 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#312e81" /> <stop offset="50%" stop-color="#7c3aed" /> <stop offset="100%" stop-color="#d946ef" /> </linearGradient>
+    <linearGradient id="gradM" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#c026d3" />
+    </linearGradient>
   </defs>
 
   <rect width="512" height="512" rx="110" fill="#ffffff"/>
 
-  <path d="M 256 256
-           c 45 -55 145 -55 145 0
-           c 0 55 -100 55 -145 0
-           c -45 -55 -145 -55 -145 0
-           c 0 55 100 55 145 0
-           Z" 
+  <path d="M 120 340 
+           L 120 200 
+           Q 120 140 180 180 
+           L 256 230 
+           L 332 180 
+           Q 392 140 392 200 
+           L 392 340" 
         fill="none" 
-        stroke="url(#grad)" 
+        stroke="url(#gradM)" 
         stroke-width="85" 
         stroke-linecap="round" 
         stroke-linejoin="round"/>

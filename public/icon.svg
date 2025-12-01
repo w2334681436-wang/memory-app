@@ -1,17 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#2E1065" />
-      <stop offset="100%" stop-color="#9333EA" />
-    </linearGradient>
+    <linearGradient id="grad_infinity" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#240b5e" /> <stop offset="100%" stop-color="#892cdc" /> </linearGradient>
   </defs>
   
-  <rect width="512" height="512" rx="120" fill="#ffffff"/>
+  <rect x="0" y="0" width="512" height="512" rx="120" ry="120" fill="#ffffff"/>
   
-  <path d="M150 256 C150 180, 256 180, 256 256 C256 332, 362 332, 362 256 C362 160, 256 120, 256 120 C256 120, 150 160, 150 256 Z M362 256 C362 332, 256 332, 256 256 C256 180, 150 180, 150 256 C150 352, 256 392, 256 392 C256 392, 362 352, 362 256 Z"
+  <path d="M165,256 C165,175 256,175 256,256 C256,337 347,337 347,256 C347,175 256,175 256,256 C256,337 165,337 165,256 Z"
         fill="none"
-        stroke="url(#grad)"
-        stroke-width="85"
+        stroke="url(#grad_infinity)"
+        stroke-width="95"
         stroke-linecap="round"
         stroke-linejoin="round"/>
 </svg>

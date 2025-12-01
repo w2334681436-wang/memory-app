@@ -1,39 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="leftGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7" /> <stop offset="100%" stop-color="#ec4899" /> </linearGradient>
+
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#312e81" /> <stop offset="100%" stop-color="#4338ca" /> </linearGradient>
-
-    <linearGradient id="rightGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#7c3aed" /> <stop offset="100%" stop-color="#d946ef" /> </linearGradient>
-
-    <linearGradient id="foldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#4c1d95" /> <stop offset="100%" stop-color="#6d28d9" /> </linearGradient>
-
-    <linearGradient id="shadow" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    
+    <linearGradient id="midGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+       <stop offset="0%" stop-color="#6b21a8" />
+       <stop offset="100%" stop-color="#9333ea" />
     </linearGradient>
   </defs>
 
   <rect width="512" height="512" rx="110" fill="#ffffff"/>
 
-  <g transform="translate(86, 106)">
+  <g transform="translate(106, 126)">
     
-    <path d="M 0 0 
-             L 170 260 
-             L 340 0 
-             L 255 0 
-             L 170 140 
-             L 85 0 
-             Z" 
-          fill="url(#foldGrad)" />
+    <path d="M0 0 L80 0 L80 260 L0 260 Z" fill="url(#darkGrad)"/>
 
-    <rect x="0" y="0" width="85" height="300" rx="12" fill="url(#leftGrad)" />
+    <path d="M80 0 L220 140 L220 260 L80 120 Z" fill="url(#midGrad)"/>
+
+    <path d="M220 140 L300 140 L300 400 L220 400 Z" fill="url(#mainGrad)"/>
     
-    <rect x="255" y="0" width="85" height="300" rx="12" fill="url(#rightGrad)" />
-
-    <rect x="85" y="0" width="20" height="100" fill="url(#shadow)" opacity="0.5" />
-    <rect x="235" y="0" width="20" height="100" fill="url(#shadow)" opacity="0.5" />
-
+    <path d="M80 0 L80 120 L220 260 L220 140 Z" fill="#000" opacity="0.15"/>
+    
   </g>
 </svg>

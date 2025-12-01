@@ -1,27 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="coverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4c1d95" /> <stop offset="50%" stop-color="#7c3aed" /> <stop offset="100%" stop-color="#db2777" /> </linearGradient>
-
-    <linearGradient id="spineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.2" />
-      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
-    </linearGradient>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#312e81" /> <stop offset="50%" stop-color="#7c3aed" /> <stop offset="100%" stop-color="#d946ef" /> </linearGradient>
   </defs>
 
   <rect width="512" height="512" rx="110" fill="#ffffff"/>
 
-  <g transform="translate(106, 86)"> <rect x="12" y="10" width="300" height="360" rx="40" fill="#e5e7eb"/>
-    <rect x="12" y="10" width="290" height="355" rx="40" fill="#f3f4f6"/>
-
-    <rect x="0" y="0" width="300" height="360" rx="40" fill="url(#coverGrad)"/>
-    
-    <rect x="0" y="0" width="40" height="360" rx="40" fill="url(#spineGrad)"/>
-    <rect x="20" y="0" width="20" height="360" fill="url(#coverGrad)"/> <g transform="translate(150, 180)" fill="#ffffff" stroke="#ffffff" stroke-width="0">
-       <line x1="-60" y1="50" x2="0" y2="0" stroke="#ffffff" stroke-width="24" stroke-linecap="round" opacity="0.9"/>
-       <line x1="0" y1="0" x2="60" y2="-50" stroke="#ffffff" stroke-width="24" stroke-linecap="round" opacity="0.9"/>
-       <line x1="0" y1="0" x2="60" y2="50" stroke="#ffffff" stroke-width="24" stroke-linecap="round" opacity="0.9"/>
-
-       <circle cx="-60" cy="50" r="24" />  <circle cx="0" cy="0" r="28" />     <circle cx="60" cy="-50" r="24" />  <circle cx="60" cy="50" r="24" />   </g>
-  </g>
+  <path d="M140 256 
+           C140 160 230 160 256 256 
+           S372 352 372 256 
+           S282 160 256 256 
+           S140 352 140 256 Z" 
+        fill="none" 
+        stroke="url(#grad)" 
+        stroke-width="110" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+  />
 </svg>

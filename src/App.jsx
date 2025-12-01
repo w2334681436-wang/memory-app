@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  BookOpen, CheckCircle, Clock, Plus, RefreshCw, TrendingUp, 
-  AlertTriangle, Archive, Calendar, Trash2, Wifi, WifiOff, Zap
+  BookOpen, CheckCircle, Clock, Plus, Trash2, WifiOff, Archive
 } from 'lucide-react';
 
 /**
@@ -21,25 +20,44 @@ const STAGES = [
   { days: 60, label: '永久封存' }
 ];
 
-// --- 启动屏组件 ---
+// --- 新增：Mnemo 折叠丝带图标组件 ---
+const MnemoIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className={className}>
+    <defs>
+      <linearGradient id="leftGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#312e81" /> <stop offset="100%" stop-color="#4338ca" /> </linearGradient>
+      <linearGradient id="rightGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#7c3aed" /> <stop offset="100%" stop-color="#d946ef" /> </linearGradient>
+      <linearGradient id="foldGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#4c1d95" /> <stop offset="100%" stop-color="#6d28d9" /> </linearGradient>
+      <linearGradient id="shadow" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#000000" stop-opacity="0.3" /> <stop offset="100%" stop-color="#000000" stop-opacity="0" /></linearGradient>
+    </defs>
+    <rect width="512" height="512" rx="110" fill="#ffffff"/>
+    <g transform="translate(86, 106)">
+      <path d="M 0 0 L 170 260 L 340 0 L 255 0 L 170 140 L 85 0 Z" fill="url(#foldGrad)" />
+      <rect x="0" y="0" width="85" height="300" rx="12" fill="url(#leftGrad)" />
+      <rect x="255" y="0" width="85" height="300" rx="12" fill="url(#rightGrad)" />
+      <rect x="85" y="0" width="20" height="100" fill="url(#shadow)" opacity="0.5" />
+      <rect x="235" y="0" width="20" height="100" fill="url(#shadow)" opacity="0.5" />
+    </g>
+  </svg>
+);
+
+// --- 启动屏组件 (更新) ---
 const SplashScreen = ({ onFinish }) => {
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setFading(true), 1500);
-    const timer2 = setTimeout(onFinish, 2000);
+    // 稍微延长一点展示时间，让用户看清漂亮的新图标
+    const timer1 = setTimeout(() => setFading(true), 1800);
+    const timer2 = setTimeout(onFinish, 2300);
     return () => { clearTimeout(timer1); clearTimeout(timer2); };
   }, [onFinish]);
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white transition-opacity duration-500 ${fading ? 'opacity-0' : 'opacity-100'}`}>
-      <div className="relative">
-        <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 animate-pulse rounded-full"></div>
-        <div className="bg-gradient-to-tr from-indigo-600 to-purple-600 p-4 rounded-2xl shadow-xl relative z-10 animate-bounce-slight">
-          <Zap className="w-10 h-10 text-white" />
-        </div>
+    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FDFDFE] transition-opacity duration-500 ${fading ? 'opacity-0' : 'opacity-100'}`}>
+      <div className="relative animate-bounce-slight">
+        {/* 移除原来的紫色背景框，直接展示新的大图标，并加上更柔和的投影 */}
+        <MnemoIcon className="w-28 h-28 drop-shadow-2xl" />
       </div>
-      <h1 className="mt-6 text-2xl font-bold text-gray-900 tracking-tight">Mnemo</h1>
+      <h1 className="mt-8 text-3xl font-bold text-gray-900 tracking-tight">Mnemo</h1>
       <p className="text-gray-400 text-sm mt-2 font-medium tracking-widest uppercase">Memory Compound</p>
       <p className="absolute bottom-10 text-[10px] text-gray-300 font-mono">{VERSION}</p>
     </div>
@@ -125,14 +143,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FDFDFE] text-slate-800 font-sans selection:bg-indigo-100 pb-safe">
-      {/* Header */}
+      {/* Header (更新：移除图标) */}
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-slate-100">
         <div className="max-w-2xl mx-auto px-4 h-14 flex justify-between items-center">
           <div className="flex items-center gap-2.5">
-            <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-1.5 rounded-lg shadow-sm">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-lg tracking-tight text-slate-900">Mnemo</span>
+            {/* 图标已移除 */}
+            <span className="font-bold text-lg tracking-tight text-slate-900 ml-1">Mnemo</span>
           </div>
           <div className="flex items-center gap-3">
              {isOffline && (

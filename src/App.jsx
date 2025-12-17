@@ -165,12 +165,12 @@ const todayStr = getTodayString();
   // --- 策略2,3,4：特殊复习日计算 ---
   const specialReviewData = useMemo(() => {
     const today = new Date();
-    // 检查是否月末 (明天是1号即为月末)
+   // 检查是否月末 (明天是1号即为月末)
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    const isMonthEnd = false
+    const isMonthEnd = tomorrow.getDate() === 1;
     // 检查是否周日 (0)
-    const isSunday = true;
+    const isSunday = today.getDay() === 0;
 
     if (!isMonthEnd && !isSunday) return null;
 

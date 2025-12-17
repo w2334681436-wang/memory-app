@@ -168,9 +168,9 @@ const todayStr = getTodayString();
     // 检查是否月末 (明天是1号即为月末)
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    const isMonthEnd = true
+    const isMonthEnd = false
     // 检查是否周日 (0)
-    const isSunday = today.getDay() === 0;
+    const isSunday = true;
 
     if (!isMonthEnd && !isSunday) return null;
 

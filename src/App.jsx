@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  BookOpen, CheckCircle, Clock, Plus, Trash2, WifiOff, Archive
+  BookOpen, CheckCircle, Clock, Plus, Trash2, WifiOff, Archive, Calendar
 } from 'lucide-react';
-
 /**
  * Mnemo (记忆复利) - PWA Version
  */
@@ -230,8 +229,37 @@ const todayStr = getTodayString();
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-{/* Undo Toast (策略5) */}
+<main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Date & Countdown Info */}
+        <div className="mb-2">
+          <h1 className="text-2xl font-bold text-slate-900">
+            {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })} · 星期{['日', '一', '二', '三', '四', '五', '六'][new Date().getDay()]}
+          </h1>
+          <div className="flex gap-4 mt-2 text-xs font-medium text-slate-500">
+             <span className="flex items-center gap-1">
+               <Calendar className="w-3 h-3 text-indigo-500" />
+               距周日复习: <span className="text-indigo-600 font-bold">{(() => {
+                 const d = (7 - new Date().getDay()) % 7;
+                 return d === 0 ? '就是今天' : `${d} 天`;
+               })()}</span>
+             </span>
+             <span className="flex items-center gap-1">
+               <Calendar className="w-3 h-3 text-rose-500" />
+               距月末复习: <span className="text-rose-600 font-bold">{(() => {
+                 const today = new Date();
+                 const currentMonth = today.getMonth();
+                 const currentYear = today.getFullYear();
+                 // 下个月的第0天即为本月最后一天
+                 const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                 const daysLeft = lastDay.getDate() - today.getDate();
+                 return daysLeft <= 0 ? '就是今天' : `${daysLeft} 天`;
+               })()}</span>
+             </span>
+          </div>
+        </div>
+
+        {/* Status Card */}
+        {/* Undo Toast (策略5) */}
         {lastState && (
           <div className="fixed top-20 right-4 z-50 animate-bounce-slight">
             <button 

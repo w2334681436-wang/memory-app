@@ -1,0 +1,207 @@
+name: Build Kaoyan Countdown APK
+
+on:
+  push:
+    branches: [build-kaoyan-countdown-apk]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Create Android project
+        shell: bash
+        run: |
+          set -e
+          rm -rf kaoyan-countdown-android
+          mkdir -p kaoyan-countdown-android/app/src/main/java/com/wxy/kaoyancountdown
+          mkdir -p kaoyan-countdown-android/app/src/main/assets
+
+          cat > kaoyan-countdown-android/settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = 'KaoyanCountdown'
+          include ':app'
+          EOF
+
+          cat > kaoyan-countdown-android/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.7.3' apply false
+          }
+          EOF
+
+          cat > kaoyan-countdown-android/app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.wxy.kaoyancountdown'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.wxy.kaoyancountdown'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0'
+              }
+          }
+          EOF
+
+          cat > kaoyan-countdown-android/app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.WAKE_LOCK" />
+              <uses-permission android:name="android.permission.INTERNET" />
+              <application
+                  android:allowBackup="true"
+                  android:hardwareAccelerated="true"
+                  android:label="考研倒计时"
+                  android:supportsRtl="true"
+                  android:theme="@android:style/Theme.Material.NoActionBar"
+                  android:usesCleartextTraffic="false">
+                  <activity
+                      android:name=".MainActivity"
+                      android:configChanges="orientation|screenSize|keyboardHidden"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > kaoyan-countdown-android/app/src/main/java/com/wxy/kaoyancountdown/MainActivity.java <<'EOF'
+          package com.wxy.kaoyancountdown;
+
+          import android.app.Activity;
+          import android.graphics.Color;
+          import android.os.Bundle;
+          import android.view.View;
+          import android.view.Window;
+          import android.view.WindowManager;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+
+          public class MainActivity extends Activity {
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  requestWindowFeature(Window.FEATURE_NO_TITLE);
+                  getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                          WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                  getWindow().setStatusBarColor(Color.BLACK);
+                  getWindow().setNavigationBarColor(Color.BLACK);
+                  hideSystemUi();
+
+                  webView = new WebView(this);
+                  webView.setBackgroundColor(Color.BLACK);
+                  webView.setWebViewClient(new WebViewClient());
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setAllowFileAccess(true);
+                  settings.setAllowContentAccess(true);
+                  settings.setBuiltInZoomControls(false);
+                  settings.setDisplayZoomControls(false);
+                  settings.setSupportZoom(false);
+                  settings.setMediaPlaybackRequiresUserGesture(false);
+
+                  setContentView(webView);
+                  webView.loadUrl("file:///android_asset/index.html");
+              }
+
+              private void hideSystemUi() {
+                  getWindow().getDecorView().setSystemUiVisibility(
+                          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                                  | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                  | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+              }
+
+              @Override
+              public void onWindowFocusChanged(boolean hasFocus) {
+                  super.onWindowFocusChanged(hasFocus);
+                  if (hasFocus) hideSystemUi();
+              }
+
+              @Override
+              protected void onResume() {
+                  super.onResume();
+                  hideSystemUi();
+              }
+
+              @Override
+              protected void onDestroy() {
+                  if (webView != null) {
+                      webView.loadUrl("about:blank");
+                      webView.stopLoading();
+                      webView.destroy();
+                  }
+                  super.onDestroy();
+              }
+          }
+          EOF
+
+          cat > /tmp/index.b64 <<'EOF'
+          PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9InpoLUNOIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04IiAvPgo8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCwgdmlld3BvcnQtZml0PWNvdmVyIiAvPgo8bWV0YSBuYW1lPSJ0aGVtZS1jb2xvciIgY29udGVudD0iIzBhMGIwZCIgLz4KPHRpdGxlPuiAg+eglOWAkuiuoeaXtiDCtyBGb2N1czwvdGl0bGU+CjxzdHlsZT4KICA6cm9vdCB7CiAgICAtLWJnOiAjMGEwYjBkOwogICAgLS1wYW5lbDogcmdiYSgyNTUsMjU1LDI1NSwuMDU1KTsKICAgIC0tcGFuZWwtMjogcmdiYSgyNTUsMjU1LDI1NSwuMDMyKTsKICAgIC0tbGluZTogcmdiYSgyNTUsMjU1LDI1NSwuMTEpOwogICAgLS10ZXh0OiAjZjVmNmY3OwogICAgLS1tdXRlZDogcmdiYSgyNDUsMjQ2LDI0NywuNDgpOwogICAgLS1zb2Z0OiByZ2JhKDI0NSwyNDYsMjQ3LC43Mik7CiAgICAtLXNoYWRvdzogMCAyMnB4IDcwcHggcmdiYSgwLDAsMCwuMzUpOwogIH0KCiAgKiB7IGJveC1zaXppbmc6IGJvcmRlci1ib3g7IH0KCiAgaHRtbCwgYm9keSB7CiAgICB3aWR0aDogMTAwJTsKICAgIGhlaWdodDogMTAwJTsKICAgIG1hcmdpbjogMDsKICAgIG92ZXJmbG93OiBoaWRkZW47CiAgICBiYWNrZ3JvdW5kOiB2YXIoLS1iZyk7CiAgICBjb2xvcjogdmFyKC0tdGV4dCk7CiAgICBmb250LWZhbWlseTogSW50ZXIsIHVpLXNhbnMtc2VyaWYsIC1hcHBsZS1zeXN0ZW0sIEJsaW5rTWFjU3lzdGVtRm9udCwKICAgICAgICAgICAgICAgICAiU0YgUHJvIERpc3BsYXkiLCAiU2Vnb2UgVUkiLCAiUGluZ0ZhbmcgU0MiLAogICAgICAgICAgICAgICAgICJNaWNyb3NvZnQgWWFIZWkiLCBBcmlhbCwgc2Fucy1zZXJpZjsKICB9CgogIGJvZHkgewogICAgZGlzcGxheTogZ3JpZDsKICAgIHBsYWNlLWl0ZW1zOiBjZW50ZXI7CiAgICBwb3NpdGlvbjogcmVsYXRpdmU7CiAgICBpc29sYXRpb246IGlzb2xhdGU7CiAgfQoKICBib2R5OjpiZWZvcmUsCiAgYm9keTo6YWZ0ZXIgewogICAgY29udGVudDogIiI7CiAgICBwb3NpdGlvbjogZml4ZWQ7CiAgICBpbnNldDogYXV0bzsKICAgIHBvaW50ZXItZXZlbnRzOiBub25lOwogICAgei1pbmRleDogLTI7CiAgICBmaWx0ZXI6IGJsdXIoNzBweCk7CiAgICBvcGFjaXR5OiAuNzI7CiAgfQoKICBib2R5OjpiZWZvcmUgewogICAgd2lkdGg6IDQ4dm1heDsKICAgIGhlaWdodDogNDh2bWF4OwogICAgbGVmdDogLTE4dm1heDsKICAgIHRvcDogLTIwdm1heDsKICAgIGJvcmRlci1yYWRpdXM6IDUwJTsKICAgIGJhY2tncm91bmQ6IHJhZGlhbC1ncmFkaWVudChjaXJjbGUsIHJnYmEoMTA5LDEzMiwyNTUsLjE3KSwgdHJhbnNwYXJlbnQgNjUlKTsKICB9CgogIGJvZHk6OmFmdGVyIHsKICAgIHdpZHRoOiA0MnZtYXg7CiAgICBoZWlnaHQ6IDQydm1heDsKICAgIHJpZ2h0OiAtMTd2bWF4OwogICAgYm90dG9tOiAtMjB2bWF4OwogICAgYm9yZGVyLXJhZGl1czogNTAlOwogICAgYmFja2dyb3VuZDogcmFkaWFsLWdyYWRpZW50KGNpcmNsZSwgcmdiYSg2NywyMDgsMTc3LC4xMDUpLCB0cmFuc3BhcmVudCA2OCUpOwogIH0KCiAgLm5vaXNlIHsKICAgIHBvc2l0aW9uOiBmaXhlZDsKICAgIGluc2V0OiAwOwogICAgei1pbmRleDogLTE7CiAgICBwb2ludGVyLWV2ZW50czogbm9uZTsKICAgIG9wYWNpdHk6IC4wMjg7CiAgICBiYWNrZ3JvdW5kLWltYWdlOiB1cmwoImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0Nzdmcgdmlld0JveD0nMCAwIDE4MCAxODAnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyclM0UlM0NmaWx0ZXIgaWQ9J24nJTNFJTNDZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nLjg2JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8lM0UlM0MvZmlsdGVyJTNFJTNDcmVjdCB3aWR0aD0nMTAwJTI1JyBoZWlnaHQ9JzEwMCUyNScgZmlsdGVyPSd1cmwoJTIzbiknIG9wYWNpdHk9Jy44Jy8lM0UlM0Mvc3ZnJTNFIik7CiAgfQoKICAuYXBwIHsKICAgIHdpZHRoOiBtaW4oOTJ2dywgMTE4MHB4KTsKICAgIGhlaWdodDogbWluKDkydmgsIDgyMHB4KTsKICAgIG1pbi1oZWlnaHQ6IDA7CiAgICBkaXNwbGF5OiBncmlkOwogICAgZ3JpZC10ZW1wbGF0ZS1yb3dzOiBhdXRvIDFmciBhdXRvOwogICAgZ2FwOiBjbGFtcCgxMnB4LCAyLjJ2aCwgMjRweCk7CiAgICBwYWRkaW5nOiBjbGFtcCgyMHB4LCAzLjN2bWluLCA0MHB4KTsKICAgIGJvcmRlcjogMXB4IHNvbGlkIHJnYmEoMjU1LDI1NSwyNTUsLjA4KTsKICAgIGJvcmRlci1yYWRpdXM6IGNsYW1wKDI0cHgsIDMuM3ZtaW4sIDM4cHgpOwogICAgYmFja2dyb3VuZDoKICAgICAgbGluZWFyLWdyYWRpZW50KDE4MGRlZywgcmdiYSgyNTUsMjU1LDI1NSwuMDQ1KSwgcmdiYSgyNTUsMjU1LDI1NSwuMDE4KSksCiAgICAgIHJnYmEoMTAsMTEsMTMsLjU0KTsKICAgIGJhY2tkcm9wLWZpbHRlcjogYmx1cigyNHB4KSBzYXR1cmF0ZSgxMTUlKTsKICAgIC13ZWJraXQtYmFja2Ryb3AtZmlsdGVyOiBibHVyKDI0cHgpIHNhdHVyYXRlKDExNSUpOwogICAgYm94LXNoYWRvdzogdmFyKC0tc2hhZG93KSwgaW5zZXQgMCAxcHggMCByZ2JhKDI1NSwyNTUsMjU1LC4wNik7CiAgfQoKICAudG9wYmFyIHsKICAgIGRpc3BsYXk6IGZsZXg7CiAgICBhbGlnbi1pdGVtczogY2VudGVyOwogICAganVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuOwogICAgbWluLWhlaWdodDogMzJweDsKICB9CgogIC5icmFuZCB7CiAgICBkaXNwbGF5OiBmbGV4OwogICAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICAgIGdhcDogMTBweDsKICAgIGNvbG9yOiB2YXIoLS1zb2Z0KTsKICAgIGxldHRlci1zcGFjaW5nOiAuMTJlbTsKICAgIGZvbnQtc2l6ZTogY2xhbXAoMTFweCwgMS4wNXZ3LCAxNHB4KTsKICAgIGZvbnQtd2VpZ2h0OiA2MDA7CiAgICB0ZXh0LXRyYW5zZm9ybTogdXBwZXJjYXNlOwogIH0KCiAgLmRvdCB7CiAgICB3aWR0aDogN3B4OwogICAgaGVpZ2h0OiA3cHg7CiAgICBib3JkZXItcmFkaXVzOiA5OTlweDsKICAgIGJhY2tncm91bmQ6ICNkOWRlZmY7CiAgICBib3gtc2hhZG93OiAwIDAgMThweCByZ2JhKDE4NiwxOTgsMjU1LC44KTsKICB9CgogIC5mdWxsc2NyZWVuIHsKICAgIGFwcGVhcmFuY2U6IG5vbmU7CiAgICBib3JkZXI6IDA7CiAgICBiYWNrZ3JvdW5kOiB0cmFuc3BhcmVudDsKICAgIGNvbG9yOiByZ2JhKDI1NSwyNTUsMjU1LC40Mik7CiAgICB3aWR0aDogMzRweDsKICAgIGhlaWdodDogMzRweDsKICAgIGJvcmRlci1yYWRpdXM6IDEwcHg7CiAgICBkaXNwbGF5OiBncmlkOwogICAgcGxhY2UtaXRlbXM6IGNlbnRlcjsKICAgIGN1cnNvcjogcG9pbnRlcjsKICAgIHRyYW5zaXRpb246IC4ycyBlYXNlOwogIH0KCiAgLmZ1bGxzY3JlZW46aG92ZXIgewogICAgY29sb3I6IHJnYmEoMjU1LDI1NSwyNTUsLjg2KTsKICAgIGJhY2tncm91bmQ6IHJnYmEoMjU1LDI1NSwyNTUsLjA2KTsKICB9CgogIC5mdWxsc2NyZWVuIHN2ZyB7IHdpZHRoOiAxOHB4OyBoZWlnaHQ6IDE4cHg7IH0KCiAgLm1haW4gewogICAgbWluLWhlaWdodDogMDsKICAgIGRpc3BsYXk6IGdyaWQ7CiAgICBhbGlnbi1jb250ZW50OiBjZW50ZXI7CiAgICBqdXN0aWZ5LWl0ZW1zOiBjZW50ZXI7CiAgICBnYXA6IGNsYW1wKDE4cHgsIDN2aCwgMzRweCk7CiAgICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoLTEuMXZoKTsKICB9CgogIC5leGFtIHsKICAgIHRleHQtYWxpZ246IGNlbnRlcjsKICB9CgogIC5leWVicm93IHsKICAgIG1hcmdpbi1ib3R0b206IGNsYW1wKCd7cHh9LCAxLjR2aCwgMTJweCk7CiAgICBmb250LXNpemU6IGNsYW1wKDExcHgsIDEuMXZ3LCAxNXB4KTsKICAgIGxldHRlci1zcGFjaW5nOiAuMzBlbTsKICAgIGNvbG9yOiB2YXIoLS1tdXRlZCk7CiAgICBmb250LXdlaWdodDogNjAwOwogIH0K
+          EOF
+          tr -d '[:space:]' < /tmp/index.b64 | base64 -d > kaoyan-countdown-android/app/src/main/assets/index.html
+
+      - name: Build APK
+        working-directory: kaoyan-countdown-android
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Prepare APK
+        run: |
+          cp kaoyan-countdown-android/app/build/outputs/apk/debug/app-debug.apk KaoyanCountdown-v1.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KaoyanCountdown-v1
+          path: KaoyanCountdown-v1.apk
+          retention-days: 7

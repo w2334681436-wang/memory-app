@@ -12,23 +12,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v3
 
       - name: Install Android platform
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
@@ -39,67 +35,70 @@ jobs:
           rm -rf kaoyan-countdown-android
           mkdir -p kaoyan-countdown-android/app/src/main/java/com/wxy/kaoyancountdown
           mkdir -p kaoyan-countdown-android/app/src/main/assets
+          mkdir -p kaoyan-countdown-android/app/src/main/res/drawable
 
-          cat > kaoyan-countdown-android/settings.gradle <<'EOF'
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
+          cat > kaoyan-countdown-android/settings.gradle <<'GRADLE'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories { google(); mavenCentral() }
           }
           rootProject.name = 'KaoyanCountdown'
           include ':app'
-          EOF
+          GRADLE
 
-          cat > kaoyan-countdown-android/build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application' version '8.7.3' apply false
-          }
-          EOF
+          cat > kaoyan-countdown-android/build.gradle <<'GRADLE'
+          plugins { id 'com.android.application' version '8.7.3' apply false }
+          GRADLE
 
-          cat > kaoyan-countdown-android/app/build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application'
-          }
-
+          cat > kaoyan-countdown-android/app/build.gradle <<'GRADLE'
+          plugins { id 'com.android.application' }
           android {
-              namespace 'com.wxy.kaoyancountdown'
-              compileSdk 35
-
-              defaultConfig {
-                  applicationId 'com.wxy.kaoyancountdown'
-                  minSdk 23
-                  targetSdk 35
-                  versionCode 1
-                  versionName '1.0'
-              }
+            namespace 'com.wxy.kaoyancountdown'
+            compileSdk 35
+            defaultConfig {
+              applicationId 'com.wxy.kaoyancountdown'
+              minSdk 23
+              targetSdk 35
+              versionCode 2
+              versionName '1.1'
+            }
           }
-          EOF
+          GRADLE
 
-          cat > kaoyan-countdown-android/app/src/main/AndroidManifest.xml <<'EOF'
+          cat > kaoyan-countdown-android/app/src/main/res/drawable/ic_launcher.xml <<'XML'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp" android:height="108dp"
+              android:viewportWidth="108" android:viewportHeight="108">
+              <path android:fillColor="#0A0D12" android:pathData="M0,0h108v108h-108z"/>
+              <path android:fillColor="#181D26" android:pathData="M0,26h108v56h-108z"/>
+              <path android:fillColor="#E9EDF2" android:fillAlpha="0.95" android:pathData="M0,43h108v22h-108z"/>
+              <path android:strokeColor="#AAB7FF" android:strokeAlpha="0.72" android:strokeWidth="4" android:strokeLineCap="round" android:fillColor="@android:color/transparent" android:pathData="M7,34 C27,13 60,16 101,34"/>
+              <path android:strokeColor="#FFFFFF" android:strokeAlpha="0.34" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="@android:color/transparent" android:pathData="M8,78 C30,60 57,69 100,78"/>
+              <path android:fillColor="#FFFFFF" android:fillAlpha="0.08" android:pathData="M28,29h52v50h-52z"/>
+              <path android:strokeColor="#FFFFFF" android:strokeAlpha="0.26" android:strokeWidth="2" android:fillColor="@android:color/transparent" android:pathData="M28,54h52"/>
+              <path android:strokeColor="#FFFFFF" android:strokeAlpha="0.95" android:strokeWidth="6" android:strokeLineCap="round" android:fillColor="@android:color/transparent" android:pathData="M37,42h14 M58,42h13"/>
+              <path android:strokeColor="#FFFFFF" android:strokeAlpha="0.72" android:strokeWidth="6" android:strokeLineCap="round" android:fillColor="@android:color/transparent" android:pathData="M37,67h14 M58,67h13"/>
+          </vector>
+          XML
+
+          cat > kaoyan-countdown-android/app/src/main/AndroidManifest.xml <<'XML'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.WAKE_LOCK" />
-              <uses-permission android:name="android.permission.INTERNET" />
               <application
                   android:allowBackup="true"
                   android:hardwareAccelerated="true"
+                  android:icon="@drawable/ic_launcher"
+                  android:roundIcon="@drawable/ic_launcher"
                   android:label="考研倒计时"
                   android:supportsRtl="true"
                   android:theme="@android:style/Theme.Material.NoActionBar"
                   android:usesCleartextTraffic="false">
-                  <activity
-                      android:name=".MainActivity"
+                  <activity android:name=".MainActivity"
                       android:configChanges="orientation|screenSize|keyboardHidden"
-                      android:exported="true">
+                      android:exported="true"
+                      android:resizeableActivity="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
                           <category android:name="android.intent.category.LAUNCHER" />
@@ -107,9 +106,9 @@ jobs:
                   </activity>
               </application>
           </manifest>
-          EOF
+          XML
 
-          cat > kaoyan-countdown-android/app/src/main/java/com/wxy/kaoyancountdown/MainActivity.java <<'EOF'
+          cat > kaoyan-countdown-android/app/src/main/java/com/wxy/kaoyancountdown/MainActivity.java <<'JAVA'
           package com.wxy.kaoyancountdown;
 
           import android.app.Activity;
@@ -124,9 +123,7 @@ jobs:
 
           public class MainActivity extends Activity {
               private WebView webView;
-
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
+              @Override protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   requestWindowFeature(Window.FEATURE_NO_TITLE);
                   getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
@@ -134,57 +131,38 @@ jobs:
                   getWindow().setStatusBarColor(Color.BLACK);
                   getWindow().setNavigationBarColor(Color.BLACK);
                   hideSystemUi();
-
                   webView = new WebView(this);
                   webView.setBackgroundColor(Color.BLACK);
                   webView.setWebViewClient(new WebViewClient());
-                  WebSettings settings = webView.getSettings();
-                  settings.setJavaScriptEnabled(true);
-                  settings.setDomStorageEnabled(true);
-                  settings.setAllowFileAccess(true);
-                  settings.setAllowContentAccess(true);
-                  settings.setBuiltInZoomControls(false);
-                  settings.setDisplayZoomControls(false);
-                  settings.setSupportZoom(false);
-                  settings.setMediaPlaybackRequiresUserGesture(false);
-
+                  WebSettings s = webView.getSettings();
+                  s.setJavaScriptEnabled(true);
+                  s.setDomStorageEnabled(true);
+                  s.setAllowFileAccess(true);
+                  s.setAllowContentAccess(true);
+                  s.setSupportZoom(false);
                   setContentView(webView);
                   webView.loadUrl("file:///android_asset/index.html");
               }
-
               private void hideSystemUi() {
                   getWindow().getDecorView().setSystemUiVisibility(
-                          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                                  | View.SYSTEM_UI_FLAG_FULLSCREEN
-                                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                  | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+                      View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                      View.SYSTEM_UI_FLAG_FULLSCREEN |
+                      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                      View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                      View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                      View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
               }
-
-              @Override
-              public void onWindowFocusChanged(boolean hasFocus) {
+              @Override public void onWindowFocusChanged(boolean hasFocus) {
                   super.onWindowFocusChanged(hasFocus);
                   if (hasFocus) hideSystemUi();
               }
-
-              @Override
-              protected void onResume() {
-                  super.onResume();
-                  hideSystemUi();
-              }
-
-              @Override
-              protected void onDestroy() {
-                  if (webView != null) {
-                      webView.loadUrl("about:blank");
-                      webView.stopLoading();
-                      webView.destroy();
-                  }
+              @Override protected void onResume() { super.onResume(); hideSystemUi(); }
+              @Override protected void onDestroy() {
+                  if (webView != null) { webView.loadUrl("about:blank"); webView.stopLoading(); webView.destroy(); }
                   super.onDestroy();
               }
           }
-          EOF
+          JAVA
 
           cp kaoyan-countdown/index.html kaoyan-countdown-android/app/src/main/assets/index.html
 
@@ -193,11 +171,10 @@ jobs:
         run: gradle :app:assembleDebug --no-daemon --stacktrace
 
       - name: Prepare APK
-        run: cp kaoyan-countdown-android/app/build/outputs/apk/debug/app-debug.apk KaoyanCountdown-v1.apk
+        run: cp kaoyan-countdown-android/app/build/outputs/apk/debug/app-debug.apk KaoyanCountdown-v4.apk
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: KaoyanCountdown-v1
-          path: KaoyanCountdown-v1.apk
+          name: KaoyanCountdown-v4
+          path: KaoyanCountdown-v4.apk
           retention-days: 7

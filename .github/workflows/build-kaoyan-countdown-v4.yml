@@ -1,4 +1,4 @@
-name: Build Kaoyan Countdown V4
+name: Build Kaoyan Countdown Final
 on:
   push:
     branches: [build-kaoyan-countdown-apk]
@@ -23,82 +23,199 @@ jobs:
       - name: Create Android project
         shell: bash
         run: |
-          set -e
-          rm -rf android-v4
-          mkdir -p android-v4/app/src/main/java/com/wxy/kaoyancountdown android-v4/app/src/main/assets
-          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p android-v4/app/src/main/res/mipmap-$d; done
-          cat > android-v4/settings.gradle <<'EOF'
+          set -euo pipefail
+          rm -rf android-final
+          mkdir -p android-final/app/src/main/java/com/wxy/kaoyancountdown android-final/app/src/main/assets
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p android-final/app/src/main/res/mipmap-$d; done
+          cat > android-final/settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
           rootProject.name='KaoyanCountdown'; include ':app'
           EOF
-          cat > android-v4/build.gradle <<'EOF'
+          cat > android-final/build.gradle <<'EOF'
           plugins { id 'com.android.application' version '8.7.3' apply false }
           EOF
-          cat > android-v4/gradle.properties <<'EOF'
+          cat > android-final/gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
           android.useAndroidX=true
           EOF
-          cat > android-v4/app/build.gradle <<'EOF'
+          cat > android-final/app/build.gradle <<'EOF'
           plugins { id 'com.android.application' }
           android {
             namespace 'com.wxy.kaoyancountdown'
             compileSdk 35
-            defaultConfig { applicationId 'com.wxy.kaoyancountdown'; minSdk 23; targetSdk 35; versionCode 4; versionName '1.3' }
+            defaultConfig {
+              applicationId 'com.wxy.kaoyancountdown'
+              minSdk 23
+              targetSdk 35
+              versionCode 5
+              versionName '1.4'
+            }
             compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
           }
           EOF
-          cat > android-v4/app/src/main/AndroidManifest.xml <<'EOF'
+          cat > android-final/app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
             <uses-permission android:name="android.permission.WAKE_LOCK"/>
-            <application android:allowBackup="true" android:hardwareAccelerated="true" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:label="考研倒计时" android:supportsRtl="true" android:theme="@android:style/Theme.Material.NoActionBar">
-              <activity android:name=".MainActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:exported="true" android:resizeableActivity="true">
-                <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+            <application
+              android:allowBackup="true"
+              android:hardwareAccelerated="true"
+              android:icon="@mipmap/ic_launcher"
+              android:roundIcon="@mipmap/ic_launcher_round"
+              android:label="考研倒计时"
+              android:supportsRtl="true"
+              android:theme="@android:style/Theme.Material.NoActionBar"
+              android:usesCleartextTraffic="false">
+              <activity
+                android:name=".MainActivity"
+                android:configChanges="orientation|screenSize|keyboardHidden"
+                android:exported="true"
+                android:resizeableActivity="true">
+                <intent-filter>
+                  <action android:name="android.intent.action.MAIN"/>
+                  <category android:name="android.intent.category.LAUNCHER"/>
+                </intent-filter>
               </activity>
             </application>
           </manifest>
           EOF
-          cat > android-v4/app/src/main/java/com/wxy/kaoyancountdown/MainActivity.java <<'EOF'
+          cat > android-final/app/src/main/java/com/wxy/kaoyancountdown/MainActivity.java <<'EOF'
           package com.wxy.kaoyancountdown;
-          import android.app.Activity;import android.graphics.Color;import android.os.Bundle;import android.view.View;import android.view.Window;import android.view.WindowManager;import android.webkit.WebSettings;import android.webkit.WebView;import android.webkit.WebViewClient;
-          public class MainActivity extends Activity{
-            WebView w;
-            public void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);hide();w=new WebView(this);w.setBackgroundColor(Color.BLACK);w.setWebViewClient(new WebViewClient());WebSettings s=w.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(true);s.setAllowContentAccess(true);s.setSupportZoom(false);setContentView(w);w.loadUrl("file:///android_asset/index.html");}
-            void hide(){getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY|View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);}
-            public void onWindowFocusChanged(boolean h){super.onWindowFocusChanged(h);if(h)hide();}
-            protected void onResume(){super.onResume();hide();}
-            protected void onDestroy(){if(w!=null){w.loadUrl("about:blank");w.stopLoading();w.destroy();}super.onDestroy();}
+          import android.app.Activity;
+          import android.graphics.Color;
+          import android.os.Bundle;
+          import android.view.View;
+          import android.view.Window;
+          import android.view.WindowManager;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          public class MainActivity extends Activity {
+            private WebView webView;
+            @Override public void onCreate(Bundle b) {
+              super.onCreate(b);
+              requestWindowFeature(Window.FEATURE_NO_TITLE);
+              getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+              hideSystemUi();
+              webView = new WebView(this);
+              webView.setBackgroundColor(Color.BLACK);
+              webView.setWebViewClient(new WebViewClient());
+              WebSettings s=webView.getSettings();
+              s.setJavaScriptEnabled(true);
+              s.setDomStorageEnabled(true);
+              s.setAllowFileAccess(true);
+              s.setAllowContentAccess(true);
+              s.setSupportZoom(false);
+              s.setBuiltInZoomControls(false);
+              s.setDisplayZoomControls(false);
+              setContentView(webView);
+              webView.loadUrl("file:///android_asset/index.html");
+            }
+            private void hideSystemUi() {
+              getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            }
+            @Override public void onWindowFocusChanged(boolean h){super.onWindowFocusChanged(h); if(h) hideSystemUi();}
+            @Override protected void onResume(){super.onResume(); hideSystemUi();}
+            @Override protected void onDestroy(){if(webView!=null){webView.loadUrl("about:blank"); webView.stopLoading(); webView.destroy();} super.onDestroy();}
           }
           EOF
-          cp kaoyan-countdown-v4/index.html android-v4/app/src/main/assets/index.html
-          python3 - <<'PY'
-          from PIL import Image,ImageDraw,ImageFilter
-          import os,math
-          root='android-v4/app/src/main/res'; sizes={'mdpi':48,'hdpi':72,'xhdpi':96,'xxhdpi':144,'xxxhdpi':192}
-          def icon(n):
-            sc=n/512; im=Image.new('RGBA',(n,n)); p=im.load(); a=(8,10,14); b=(238,241,245); c=(8,10,14)
-            for y in range(n):
-              t=y/(n-1); u=t/.5 if t<.5 else (t-.5)/.5; x=tuple(int((a[i] if t<.5 else b[i])*(1-u)+(b[i] if t<.5 else c[i])*u) for i in range(3))
-              for xx in range(n): p[xx,y]=x+(255,)
-            glow=Image.new('RGBA',(n,n),(0,0,0,0));g=ImageDraw.Draw(glow);g.ellipse((-n*.10,n*.02,n*.82,n*.72),fill=(135,151,255,54));g.ellipse((n*.28,n*.30,n*1.05,n*1.03),fill=(107,235,215,36));glow=glow.filter(ImageFilter.GaussianBlur(max(3,int(26*sc))));im.alpha_composite(glow)
-            d=ImageDraw.Draw(im);d.arc((-n*.09,n*.03,n*1.08,n*.82),195,337,fill=(184,195,255,220),width=max(3,int(16*sc)));d.arc((-n*.08,n*.42,n*.98,n*1.12),18,146,fill=(255,255,255,110),width=max(2,int(10*sc)))
-            x0,y0,x1,y1=n*.25,n*.26,n*.75,n*.74;r=max(3,int(18*sc));d.rounded_rectangle((x0,y0,x1,y1),radius=r,fill=(255,255,255,18),outline=(255,255,255,85),width=max(1,int(3*sc)));d.line((x0+n*.03,(y0+y1)/2,x1-n*.03,(y0+y1)/2),fill=(255,255,255,76),width=max(1,int(2*sc)))
-            d.rounded_rectangle((n*.32,n*.34,n*.48,n*.40),radius=max(1,int(5*sc)),fill=(255,255,255,240));d.rounded_rectangle((n*.53,n*.34,n*.68,n*.40),radius=max(1,int(5*sc)),fill=(255,255,255,185));d.rounded_rectangle((n*.32,n*.53,n*.48,n*.59),radius=max(1,int(5*sc)),fill=(255,255,255,170));d.rounded_rectangle((n*.53,n*.53,n*.68,n*.59),radius=max(1,int(5*sc)),fill=(255,255,255,125))
-            mask=Image.new('L',(n,n),0);m=ImageDraw.Draw(mask);m.rounded_rectangle((0,0,n-1,n-1),radius=max(8,int(118*sc)),fill=255);out=Image.new('RGBA',(n,n),(0,0,0,0));out.paste(im,(0,0),mask);return out
+          cp kaoyan-countdown/index.html android-final/app/src/main/assets/index.html
+          cat > /tmp/make_icon.py <<'PY'
+          from PIL import Image, ImageDraw, ImageFilter
+          import math
+
+          def make_icon(n=512):
+              S=n/512.0
+              im=Image.new('RGBA',(n,n),(0,0,0,0))
+              bg=Image.new('RGBA',(n,n),(0,0,0,255)); p=bg.load()
+              for y in range(n):
+                  t=y/(n-1)
+                  band=math.exp(-((t-0.50)/0.20)**2)
+                  topglow=math.exp(-((t-0.22)/0.24)**2)
+                  r=int(7 + 98*band + 9*topglow)
+                  g=int(10 + 104*band + 12*topglow)
+                  b=int(16 + 116*band + 20*topglow)
+                  for x in range(n): p[x,y]=(r,g,b,255)
+              glow=Image.new('RGBA',(n,n),(0,0,0,0)); d=ImageDraw.Draw(glow)
+              d.ellipse((-n*.22,n*.30,n*1.22,n*.70),fill=(238,244,255,72))
+              d.ellipse((-n*.05,n*.38,n*1.05,n*.62),fill=(255,255,255,44))
+              glow=glow.filter(ImageFilter.GaussianBlur(max(4,int(35*S))))
+              bg.alpha_composite(glow)
+              ribbons=Image.new('RGBA',(n,n),(0,0,0,0)); rd=ImageDraw.Draw(ribbons)
+              rd.arc((-n*.20,-n*.10,n*1.15,n*.88),190,338,fill=(122,151,255,210),width=max(4,int(14*S)))
+              rd.arc((-n*.12,-n*.02,n*1.12,n*.82),198,342,fill=(205,220,255,145),width=max(2,int(6*S)))
+              rd.arc((-n*.10,n*.44,n*1.10,n*1.17),18,158,fill=(92,235,219,130),width=max(3,int(10*S)))
+              rd.arc((n*.02,n*.50,n*.98,n*1.08),22,155,fill=(255,255,255,74),width=max(2,int(4*S)))
+              ribbons=ribbons.filter(ImageFilter.GaussianBlur(max(1,int(3.0*S))))
+              bg.alpha_composite(ribbons)
+              card=Image.new('RGBA',(n,n),(0,0,0,0)); cd=ImageDraw.Draw(card)
+              x0,y0,x1,y1=n*.205,n*.255,n*.795,n*.745
+              rr=max(8,int(34*S))
+              cd.rounded_rectangle((x0,y0,x1,y1),radius=rr,fill=(2,6,13,136),outline=(255,255,255,54),width=max(1,int(2*S)))
+              cd.rounded_rectangle((x0+4*S,y0+4*S,x1-4*S,y1-4*S),radius=max(6,int(29*S)),outline=(160,183,255,24),width=max(1,int(2*S)))
+              cd.line((x0+n*.035,(y0+y1)/2,x1-n*.035,(y0+y1)/2),fill=(255,255,255,38),width=max(1,int(2*S)))
+              gap=n*.035; tw=(x1-x0-gap*3)/2
+              tiles=[]
+              for i in range(2):
+                  tx0=x0+gap+i*(tw+gap); tx1=tx0+tw
+                  ty0=y0+n*.075; ty1=y1-n*.075
+                  cd.rounded_rectangle((tx0,ty0,tx1,ty1),radius=max(5,int(20*S)),fill=(5,10,19,160),outline=(255,255,255,42),width=max(1,int(2*S)))
+                  cd.line((tx0+n*.02,(ty0+ty1)/2,tx1-n*.02,(ty0+ty1)/2),fill=(255,255,255,32),width=max(1,int(2*S)))
+                  tiles.append((tx0,ty0,tx1,ty1))
+              segs={'a':((.22,.16),(.78,.16)), 'b':((.80,.19),(.80,.47)), 'c':((.80,.53),(.80,.81)), 'd':((.22,.84),(.78,.84)), 'e':((.20,.53),(.20,.81)), 'f':((.20,.19),(.20,.47)), 'g':((.22,.50),(.78,.50))}
+              nums={'2':'abdeg','7':'abc'}
+              for box,digit,col in [(tiles[0],'2',(228,236,255,245)),(tiles[1],'7',(135,210,255,245))]:
+                  tx0,ty0,tx1,ty1=box; w=tx1-tx0; h=ty1-ty0
+                  gimg=Image.new('RGBA',(n,n),(0,0,0,0)); gd=ImageDraw.Draw(gimg)
+                  for s in nums[digit]:
+                      (xA,yA),(xB,yB)=segs[s]
+                      gd.line((tx0+xA*w,ty0+yA*h,tx0+xB*w,ty0+yB*h),fill=col[:-1]+(115,),width=max(3,int(14*S)))
+                  gimg=gimg.filter(ImageFilter.GaussianBlur(max(2,int(9*S))))
+                  card.alpha_composite(gimg)
+                  cd=ImageDraw.Draw(card)
+                  for s in nums[digit]:
+                      (xA,yA),(xB,yB)=segs[s]
+                      cd.line((tx0+xA*w,ty0+yA*h,tx0+xB*w,ty0+yB*h),fill=col,width=max(2,int(7*S)))
+              bg.alpha_composite(card)
+              outl=Image.new('RGBA',(n,n),(0,0,0,0)); od=ImageDraw.Draw(outl)
+              pad=max(2,int(5*S)); radius=max(14,int(112*S))
+              od.rounded_rectangle((pad,pad,n-1-pad,n-1-pad),radius=radius,outline=(255,255,255,46),width=max(1,int(2*S)))
+              bg.alpha_composite(outl)
+              mask=Image.new('L',(n,n),0); md=ImageDraw.Draw(mask)
+              md.rounded_rectangle((0,0,n-1,n-1),radius=max(14,int(112*S)),fill=255)
+              im.paste(bg,(0,0),mask)
+              return im
+
+          sizes={'mdpi':48,'hdpi':72,'xhdpi':96,'xxhdpi':144,'xxxhdpi':192}
           for den,n in sizes.items():
-            i=icon(n);i.save(f'{root}/mipmap-{den}/ic_launcher.png');i.save(f'{root}/mipmap-{den}/ic_launcher_round.png')
+              img=make_icon(n)
+              img.save(f'android-final/app/src/main/res/mipmap-{den}/ic_launcher.png', optimize=True)
+              img.save(f'android-final/app/src/main/res/mipmap-{den}/ic_launcher_round.png', optimize=True)
           PY
-      - name: Build signed debug APK
-        working-directory: android-v4
-        run: gradle assembleDebug
-      - name: Verify APK
+          python3 /tmp/make_icon.py
+      - name: Build APK
+        working-directory: android-final
+        run: gradle assembleDebug --no-daemon --stacktrace
+      - name: Verify APK package, signature, assets and icons
+        shell: bash
         run: |
-          test -s android-v4/app/build/outputs/apk/debug/app-debug.apk
-          unzip -l android-v4/app/build/outputs/apk/debug/app-debug.apk | grep -E 'assets/index.html|res/.*ic_launcher' || true
-          cp android-v4/app/build/outputs/apk/debug/app-debug.apk KaoyanCountdown-v4.apk
+          set -euo pipefail
+          APK=android-final/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt2" dump badging "$APK" | tee /tmp/badging.txt
+          grep -q "package: name='com.wxy.kaoyancountdown' versionCode='5' versionName='1.4'" /tmp/badging.txt
+          unzip -l "$APK" | grep -q 'assets/index.html'
+          unzip -l "$APK" | grep -q 'res/mipmap-xxxhdpi-v4/ic_launcher.png'
+          unzip -p "$APK" assets/index.html | grep -q 'flipTop'
+          unzip -p "$APK" assets/index.html | grep -q 'flow-stage'
+          cp "$APK" KaoyanCountdown-final.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: KaoyanCountdown-v4
-          path: KaoyanCountdown-v4.apk
+          name: KaoyanCountdown-final
+          path: KaoyanCountdown-final.apk
           retention-days: 7
